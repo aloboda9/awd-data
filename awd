@@ -1,0 +1,25 @@
+import numpy as np
+import pandas as pd
+import os
+import matplotlib.pyplot as plt
+
+os.chdir('C:\\Users\\andrz\\Desktop\\AWD')
+file = 'Netflix Original Content Dataset.csv'
+
+data = pd.read_csv(file)
+
+#Osobny array z 10 najczęsciej oglądanymi pozycjami na netflixie
+top10 = data.nlargest(10,'Viewership (Millions)')
+
+fig, ax = plt.subplots()
+ax.barh(top10['Title'],top10['Viewership (Millions)'])
+plt.title('Most viewed shows')
+plt.show()
+
+#srednia ogladalnosc filmow vs seriali
+
+mean_Film = data[data['Type '] == 'Film'].mean()
+mean_TV = data[data['Type '] == 'TV'].mean()
+
+print(mean_Film)
+print(mean_TV)
