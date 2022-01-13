@@ -66,13 +66,14 @@ topFemale.plot.pie(figsize = (6,6))
 
 #Jakie gatunki były najpopularniejsze w wybranych latach? 
 
-Leader = data.groupby(['Year Released']).mean().round()
-column_labels = Leader.columns.tolist()
-index_labels = Leader.index.tolist()
+Leader = data.groupby(['Year Released']).head(1).sort_values(['Year Released'], axis=0, ascending=True)
+Reader = Leader.drop(['Seasons','Main Actor','International','Animated','Rating'],axis=1) 
+column_labels = Reader.columns.tolist()
+index_labels = Reader.index.tolist()
 
 
 plt.subplot(911)
-plt.table(cellText= Leader.values,colWidths = [0.25]*len(column_labels),
+plt.table(cellText= Reader.values,colWidths = [0.25]*len(column_labels),
           rowLabels= index_labels,
           colLabels= column_labels,
           cellLoc = 'center', rowLoc = 'center',
