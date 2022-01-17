@@ -69,3 +69,17 @@ plt.table(cellText= Reader.values,colWidths = [0.25]*len(column_labels),
           cellLoc = 'center', rowLoc = 'center',
           loc='top')
 fig = plt.gcf()
+
+#Czy filmy i seriale dostępne globalnie cieszą się większą oglądalnością? 
+
+international = data.groupby(['International']).sum()
+plt.figure(8)
+def make_autopct(values):
+    def my_autopct(pct):
+        total = sum(values)
+        val = int(round(pct*total/100.0))
+        return '{p:.2f}%  ({v:d})'.format(p=pct,v=val)
+    return my_autopct
+
+plt.title('Summed views of intenational and non-international shows')
+international['Viewership (Millions)'].plot.pie(figsize =(6,6),autopct=make_autopct(international['Viewership (Millions)']))
