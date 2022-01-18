@@ -16,21 +16,21 @@ topRTC = topGenre.nlargest(10,  'RT Critic Score')
 topIMDb = topGenre.nlargest(10,  'IMDb Rating')
  
 plt.figure(1)
-plt.title('Mean RT Audience Score')
-topRTA['RT Audience Score'].plot.barh()
+plt.title('Rysunek 1.1: 10 najwyższych uśrednionych RT Audience Score', y=-0.2, loc='center')
+topRTA['RT Audience Score'].plot.barh().invert_yaxis()
 plt.figure(2)
-plt.title('Mean RT Critic Score')
-topRTC['RT Critic Score'].plot.barh()
+plt.title('Rysunek 1.2: 10 najwyższych uśrednionych RT Critic Score',y=-0.2, loc='center')
+topRTC['RT Critic Score'].plot.barh().invert_yaxis()
 plt.figure(3)
-plt.title('Mean IMDb Rating')
-topIMDb['IMDb Rating'].plot.barh()
+plt.title('Rysunek 1.3: 10 najwyższych uśrednionych IMDb Rating',y=-0.2, loc='center')
+topIMDb['IMDb Rating'].plot.barh().invert_yaxis()
 
 
 #Czy filmy o łagodniejszej klasyfikacji wiekowej częściej są animacjami? 
 
 Animations = data[data['Animated'] == 'yes']
 plt.figure(4)
-plt.title('Categories of animated films')
+plt.title('Rysynek 2: Podział filmów animowanych ze względu na kategorię',y=-0.1, loc='center')
 Animations['Rating'].value_counts().plot.pie(figsize =(6,6),autopct='%1.1f%%')
 
 #Czy typowym dla niektórych gatunków jest większa ilość sezonów czy nie, jeśli tak to dla jakich? 
@@ -38,7 +38,7 @@ Animations['Rating'].value_counts().plot.pie(figsize =(6,6),autopct='%1.1f%%')
 Sezony = data.groupby(['Genre']).mean()
 topSezony = Sezony.nlargest(10,'Seasons')
 plt.figure(5)
-plt.title('10 genres with most seasons')
+plt.title('Rysunek 3: 10 gatunków z największą ilością sezonów',y=-0.2, loc='center')
 topSezony['Seasons'].plot.barh().invert_yaxis()
 
 #W jakich gatunkowo treściach główne role zajmują kobiety a w jakich mężczyźni, czy jest różnica?
@@ -46,23 +46,24 @@ topSezony['Seasons'].plot.barh().invert_yaxis()
 roleMale = data[data['Main Actor'] == 'Male']
 topMale = roleMale['Genre'].value_counts().nlargest(10)
 plt.figure(6)
-plt.title('10 most popular genres with male as main actor')
-topMale.plot.pie(figsize = (6,6))
+plt.title('Rysunek 4.1: 10 najpopularniejszych gatunków z mężczyzną w roli głównej', y=-0.1, loc='center')
+topMale.plot.pie(figsize = (6,6),autopct='%1.1f%%')
 
 roleFemale = data[data['Main Actor'] == 'Female']
 topFemale = roleFemale['Genre'].value_counts().nlargest(10)
-plt.figure(7)
-plt.title('10 most popular genres with female as main actress')
-topFemale.plot.pie(figsize = (6,6))
+plt.figure(6)
+plt.title('Rysunek 4.2: 10 najpopularniejszych gatunków z kobietą w roli głównej', y=-0.1, loc='center')
+topFemale.plot.pie(figsize = (6,6),autopct='%1.1f%%')
 
 #Jakie gatunki były najpopularniejsze w wybranych latach? 
 
 Leader = data.groupby(['Year Released']).head(1).sort_values(['Year Released'], axis=0, ascending=True)
-Reader = Leader.drop(['Seasons','Main Actor','International','Animated','Rating'],axis=1) 
+Reader = Leader.drop(['Seasons','Main Actor','International','Animated','Rating','Type ','Title'],axis=1) 
 column_labels = Reader.columns.tolist()
 index_labels = Reader.index.tolist()
 
 plt.subplot(911)
+plt.title('Rysunek 5: Uśrednione statystyki najpopularniejszego gatunku z każdego roku',y=-1.1, loc='center')
 plt.table(cellText= Reader.values,colWidths = [0.25]*len(column_labels),
           rowLabels= index_labels,
           colLabels= column_labels,
@@ -81,5 +82,23 @@ def make_autopct(values):
         return '{p:.2f}%  ({v:d})'.format(p=pct,v=val)
     return my_autopct
 
-plt.title('Summed views of intenational and non-international shows')
+plt.title('Rysunek 6: Łączne wyświetlenia dla zmienych international i non-international (w milionach)',y=-0.1, loc='center')
 international['Viewership (Millions)'].plot.pie(figsize =(6,6),autopct=make_autopct(international['Viewership (Millions)']))
+
+#Jaki stopień korelacji wykazują oceny krytyków i publiczności? 
+
+korelacje = data[['RT Critic Score','RT Audience Score','IMDb Rating','Viewership (Millions)']]
+korelacje.corr(method = 'pearson').style.background_gradient(cmap = "Blues").set_precision(2)
+
+#Co cechuje grupę seriali a co cechuje grupę filmów? 
+
+ViewershipSummed = data.groupby(['Type ']).sum()
+
+MostViews = data[data['Type ']== 'TV'].nlargest(1, 'Viewership (Millions)')
+MostViews1= data[data['Type ']== 'Film'].nlargest(1, 'Viewership (Millions)')
+outcome = MostViews.append(MostViews1)
+
+compare = data.groupby(['Type ']).mean().drop(['Seasons','Year Released'], axis = 1)
+compare = compare.assign(Summed_Viewership = ViewershipSummed['Viewership (Millions)'])
+
+
